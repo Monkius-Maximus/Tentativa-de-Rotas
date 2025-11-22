@@ -53,7 +53,10 @@ app.use('/api/reservas', reservaRoutes);
 
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error(err.stack);
+  // Log error for debugging (use proper logging in production)
+  if (process.env.NODE_ENV !== 'production') {
+    console.error(err.stack);
+  }
   res.status(500).json({ error: 'Algo deu errado!' });
 });
 

@@ -24,8 +24,12 @@ export const getAllReservas = async (req: Request, res: Response) => {
 export const getReservaById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const numId = parseInt(id);
+    if (isNaN(numId)) {
+      return res.status(400).json({ error: 'ID deve ser um número válido' });
+    }
     const reserva = await prisma.reserva.findUnique({
-      where: { id_reserva: parseInt(id) },
+      where: { id_reserva: numId },
       include: {
         area_comum: true,
         morador: {
@@ -48,12 +52,24 @@ export const getReservaById = async (req: Request, res: Response) => {
 export const createReserva = async (req: Request, res: Response) => {
   try {
     const { id_area, cpf_morador, data_reserva, hora_reserva, situacao } = req.body;
+    
+    // Validate dates
+    const dataReservaDate = new Date(data_reserva);
+    const horaReservaDate = new Date(hora_reserva);
+    
+    if (isNaN(dataReservaDate.getTime())) {
+      return res.status(400).json({ error: 'Data de reserva inválida' });
+    }
+    if (isNaN(horaReservaDate.getTime())) {
+      return res.status(400).json({ error: 'Hora de reserva inválida' });
+    }
+    
     const reserva = await prisma.reserva.create({
       data: {
         id_area,
         cpf_morador,
-        data_reserva: new Date(data_reserva),
-        hora_reserva: new Date(hora_reserva),
+        data_reserva: dataReservaDate,
+        hora_reserva: horaReservaDate,
         situacao: situacao || 'PENDENTE'
       }
     });
@@ -67,9 +83,13 @@ export const createReserva = async (req: Request, res: Response) => {
 export const updateReserva = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const numId = parseInt(id);
+    if (isNaN(numId)) {
+      return res.status(400).json({ error: 'ID deve ser um número válido' });
+    }
     const { situacao } = req.body;
     const reserva = await prisma.reserva.update({
-      where: { id_reserva: parseInt(id) },
+      where: { id_reserva: numId },
       data: {
         situacao
       }
@@ -84,8 +104,12 @@ export const updateReserva = async (req: Request, res: Response) => {
 export const deleteReserva = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const numId = parseInt(id);
+    if (isNaN(numId)) {
+      return res.status(400).json({ error: 'ID deve ser um número válido' });
+    }
     await prisma.reserva.delete({
-      where: { id_reserva: parseInt(id) }
+      where: { id_reserva: numId }
     });
     res.status(204).send();
   } catch (error) {

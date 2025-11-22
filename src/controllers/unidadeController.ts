@@ -19,8 +19,12 @@ export const getAllUnidades = async (req: Request, res: Response) => {
 export const getUnidadeById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const numId = parseInt(id);
+    if (isNaN(numId)) {
+      return res.status(400).json({ error: 'ID deve ser um número válido' });
+    }
     const unidade = await prisma.unidade.findUnique({
-      where: { id_unidade: parseInt(id) },
+      where: { id_unidade: numId },
       include: {
         moradores: true
       }
@@ -57,9 +61,13 @@ export const createUnidade = async (req: Request, res: Response) => {
 export const updateUnidade = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const numId = parseInt(id);
+    if (isNaN(numId)) {
+      return res.status(400).json({ error: 'ID deve ser um número válido' });
+    }
     const { bloco, numero_ap, andar, metragem, vaga_garagem } = req.body;
     const unidade = await prisma.unidade.update({
-      where: { id_unidade: parseInt(id) },
+      where: { id_unidade: numId },
       data: {
         bloco,
         numero_ap,
@@ -78,8 +86,12 @@ export const updateUnidade = async (req: Request, res: Response) => {
 export const deleteUnidade = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const numId = parseInt(id);
+    if (isNaN(numId)) {
+      return res.status(400).json({ error: 'ID deve ser um número válido' });
+    }
     await prisma.unidade.delete({
-      where: { id_unidade: parseInt(id) }
+      where: { id_unidade: numId }
     });
     res.status(204).send();
   } catch (error) {

@@ -41,8 +41,12 @@ export const getAllOrdensServico = async (req: Request, res: Response) => {
 export const getOrdemServicoById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const numId = parseInt(id);
+    if (isNaN(numId)) {
+      return res.status(400).json({ error: 'ID deve ser um número válido' });
+    }
     const ordem = await prisma.ordemServico.findUnique({
-      where: { id_os: parseInt(id) },
+      where: { id_os: numId },
       include: {
         morador: {
           include: {
@@ -102,9 +106,13 @@ export const createOrdemServico = async (req: Request, res: Response) => {
 export const updateOrdemServico = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const numId = parseInt(id);
+    if (isNaN(numId)) {
+      return res.status(400).json({ error: 'ID deve ser um número válido' });
+    }
     const { data_abertura, data_conclusao, situacao, descricao_prob, cpf_morador, cpf_sindico } = req.body;
     const ordem = await prisma.ordemServico.update({
-      where: { id_os: parseInt(id) },
+      where: { id_os: numId },
       data: {
         data_abertura: data_abertura ? new Date(data_abertura) : undefined,
         data_conclusao: data_conclusao ? new Date(data_conclusao) : null,
@@ -124,8 +132,12 @@ export const updateOrdemServico = async (req: Request, res: Response) => {
 export const deleteOrdemServico = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const numId = parseInt(id);
+    if (isNaN(numId)) {
+      return res.status(400).json({ error: 'ID deve ser um número válido' });
+    }
     await prisma.ordemServico.delete({
-      where: { id_os: parseInt(id) }
+      where: { id_os: numId }
     });
     res.status(204).send();
   } catch (error) {

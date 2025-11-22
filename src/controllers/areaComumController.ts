@@ -19,8 +19,12 @@ export const getAllAreasComuns = async (req: Request, res: Response) => {
 export const getAreaComumById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const numId = parseInt(id);
+    if (isNaN(numId)) {
+      return res.status(400).json({ error: 'ID deve ser um número válido' });
+    }
     const area = await prisma.areaComum.findUnique({
-      where: { id_area: parseInt(id) },
+      where: { id_area: numId },
       include: {
         reservas: true
       }
@@ -54,9 +58,13 @@ export const createAreaComum = async (req: Request, res: Response) => {
 export const updateAreaComum = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const numId = parseInt(id);
+    if (isNaN(numId)) {
+      return res.status(400).json({ error: 'ID deve ser um número válido' });
+    }
     const { nome_area, capacidade_max } = req.body;
     const area = await prisma.areaComum.update({
-      where: { id_area: parseInt(id) },
+      where: { id_area: numId },
       data: {
         nome_area,
         capacidade_max
@@ -72,8 +80,12 @@ export const updateAreaComum = async (req: Request, res: Response) => {
 export const deleteAreaComum = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const numId = parseInt(id);
+    if (isNaN(numId)) {
+      return res.status(400).json({ error: 'ID deve ser um número válido' });
+    }
     await prisma.areaComum.delete({
-      where: { id_area: parseInt(id) }
+      where: { id_area: numId }
     });
     res.status(204).send();
   } catch (error) {
