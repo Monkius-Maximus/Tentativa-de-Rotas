@@ -1,0 +1,155 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Unidade {
+  id_unidade   Int       @id @default(autoincrement())
+  bloco        Int
+  numero_ap    Int
+  andar        Int
+  metragem     Decimal?  @db.Decimal(6, 2)
+  vaga_garagem Int
+  moradores    Morador[]
+
+  @@map("unidade")
+}
+
+model AreaComum {
+  id_area        Int       @id @default(autoincrement())
+  nome_area      String    @db.VarChar(20)
+  capacidade_max Int
+  reservas       Reserva[]
+
+  @@map("area_comum")
+}
+
+model Usuario {
+  cpf         String        @id @db.Char(11)
+  prim_nome   String        @db.VarChar(30)
+  segun_nome  String        @db.VarChar(30)
+  terce_nome  String        @db.VarChar(30)
+  telefone    String        @db.Char(11)
+  email       String?       @unique @db.VarChar(100)
+  morador     Morador?
+  funcionario Funcionario?
+
+  @@map("usuario")
+}
+
+model Morador {
+  cpf_morador       String          @id @db.VarChar(11)
+  respons_familiar  Boolean
+  propriet_imovel   Boolean
+  id_unidade        Int
+  usuario           Usuario         @relation(fields: [cpf_morador], references: [cpf], onDelete: Cascade)
+  unidade           Unidade         @relation(fields: [id_unidade], references: [id_unidade])
+  sindico           Sindico?
+  ordens_servico    OrdemServico[]
+  reservas          Reserva[]
+
+  @@map("morador")
+}
+
+model Funcionario {
+  cpf_funcionario String       @id @db.Char(11)
+  matricula       String       @db.VarChar(20)
+  expediente      String?      @db.VarChar(30)
+  salario         Decimal      @db.Decimal(7, 2)
+  usuario         Usuario      @relation(fields: [cpf_funcionario], references: [cpf], onDelete: Cascade)
+  externo         Externo?
+  interno         Interno?
+  executa_os      ExecutaOs[]
+
+  @@map("funcionario")
+}
+
+model Externo {
+  cpf_externo        String      @db.Char(11)
+  cnpj_empresa       String      @db.Char(14)
+  tipo_servico       String      @db.VarChar(15)
+  descricao_servico  String      @db.VarChar(200)
+  funcionario        Funcionario @relation(fields: [cpf_externo], references: [cpf_funcionario], onDelete: Cascade)
+
+  @@id([cpf_externo, cnpj_empresa])
+  @@map("externo")
+}
+
+model Interno {
+  cpf_interno       String      @id @db.Char(11)
+  tipo_servico      String      @db.VarChar(15)
+  descricao_servico String      @db.VarChar(200)
+  funcionario       Funcionario @relation(fields: [cpf_interno], references: [cpf_funcionario], onDelete: Cascade)
+
+  @@map("interno")
+}
+
+model Sindico {
+  cpf_sindico     String         @id @db.Char(11)
+  inicio_mandato  DateTime       @db.Date
+  fim_mandato     DateTime       @db.Date
+  morador         Morador        @relation(fields: [cpf_sindico], references: [cpf_morador], onDelete: Cascade)
+  financas        Financas[]
+  ordens_servico  OrdemServico[]
+
+  @@map("sindico")
+}
+
+model Financas {
+  id_financas      Int      @id @default(autoincrement())
+  cpf_sindico      String?  @db.Char(11)
+  item_limpeza     String?  @db.VarChar(20)
+  item_manutencao  String?  @db.VarChar(20)
+  receita          Decimal? @db.Decimal(10, 2)
+  despesas         Decimal? @db.Decimal(10, 2)
+  impostos         Decimal? @db.Decimal(10, 2)
+  sindico          Sindico? @relation(fields: [cpf_sindico], references: [cpf_sindico], onDelete: SetNull)
+
+  @@map("financas")
+}
+
+model OrdemServico {
+  id_os           Int         @id @default(autoincrement())
+  data_abertura   DateTime    @db.Date
+  data_conclusao  DateTime?   @db.Date
+  situacao        String      @db.VarChar(20)
+  descricao_prob  String?     @db.VarChar(200)
+  cpf_morador     String?     @db.Char(11)
+  cpf_sindico     String?     @db.Char(11)
+  morador         Morador?    @relation(fields: [cpf_morador], references: [cpf_morador], onDelete: SetNull)
+  sindico         Sindico?    @relation(fields: [cpf_sindico], references: [cpf_sindico], onDelete: SetNull)
+  executa_os      ExecutaOs?
+
+  @@map("ordem_servico")
+}
+
+model Reserva {
+  id_reserva    Int       @id @default(autoincrement())
+  id_area       Int
+  cpf_morador   String    @db.Char(11)
+  data_reserva  DateTime  @db.Date
+  hora_reserva  DateTime  @db.Time
+  situacao      String    @default("PENDENTE") @db.VarChar(20)
+  area_comum    AreaComum @relation(fields: [id_area], references: [id_area])
+  morador       Morador   @relation(fields: [cpf_morador], references: [cpf_morador])
+
+  @@unique([id_area, data_reserva, hora_reserva])
+  @@map("reserva")
+}
+
+model ExecutaOs {
+  id_os           Int          @id
+  cpf_funcionario String?      @db.Char(11)
+  tipo_servico    String       @db.VarChar(15)
+  ordem_servico   OrdemServico @relation(fields: [id_os], references: [id_os], onDelete: Cascade)
+  funcionario     Funcionario? @relation(fields: [cpf_funcionario], references: [cpf_funcionario], onDelete: SetNull)
+
+  @@map("executa_os")
+}
