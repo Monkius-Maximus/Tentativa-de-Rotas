@@ -7,7 +7,7 @@ export const getAllFuncionarios = async (req: Request, res: Response) => {
     const funcionarios = await prisma.funcionario.findMany({
       include: {
         usuario: true,
-        externo: true,
+        externos: true,
         interno: true
       }
     });
@@ -25,7 +25,7 @@ export const getFuncionarioByCpf = async (req: Request, res: Response) => {
       where: { cpf_funcionario: cpf },
       include: {
         usuario: true,
-        externo: true,
+        externos: true,
         interno: true
       }
     });

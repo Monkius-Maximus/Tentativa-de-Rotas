@@ -64,7 +64,7 @@ model Funcionario {
   expediente      String?      @db.VarChar(30)
   salario         Decimal      @db.Decimal(7, 2)
   usuario         Usuario      @relation(fields: [cpf_funcionario], references: [cpf], onDelete: Cascade)
-  externo         Externo?
+  externos        Externo[]
   interno         Interno?
   executa_os      ExecutaOs[]
 
